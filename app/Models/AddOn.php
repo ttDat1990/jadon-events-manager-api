@@ -12,7 +12,7 @@ class AddOn extends Model
     use HasFactory;
 
     protected $fillable = ['department', 'responsible', 'event_id'];
-    protected $table = 'add_on';
+    protected $table = 'add_ons';
     public function event()
     {
         return $this->belongsTo(Event::class);

@@ -32,13 +32,12 @@ Route::delete('categories/{id}', [CategoryController::class, 'destroy']);
 Route::get('events', [EventController::class, 'index']);
 Route::get('events/{id}', [EventController::class, 'show']);
 Route::post('events', [EventController::class, 'store']);
-Route::put('events/{id}', [EventController::class, 'update']);
+Route::post('events/{id}', [EventController::class, 'update']);
 Route::delete('events/{id}', [EventController::class, 'destroy']);
 
 //slides
-// GET /api/slides: Lấy danh sách tất cả các slides.
-// GET /api/slides/{id}: Lấy thông tin chi tiết của một slide theo ID.
-// POST /api/slides: Tạo một slide mới.
-// PUT /api/slides/{id}: Cập nhật thông tin của một slide theo ID.
-// DELETE /api/slides/{id}: Xoá một slide theo ID.
-Route::resource('slides', SlideController::class);
+Route::get('slides', [SlideController::class, 'index']);
+Route::post('slides', [SlideController::class, 'store']);
+Route::get('slides/{id}', [SlideController::class, 'show']);
+Route::post('slides/{id}', [SlideController::class, 'update']);
+Route::delete('slides/{id}', [SlideController::class, 'destroy']);

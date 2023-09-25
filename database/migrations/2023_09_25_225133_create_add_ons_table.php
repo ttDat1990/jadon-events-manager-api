@@ -13,13 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('press_review', function (Blueprint $table) {
+        Schema::create('add_ons', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('content');
-            $table->string('link')->nullable();
-            $table->string('author', 50)->nullable();
+            $table->string('department');
+            $table->string('responsible');
+            $table->unsignedBigInteger('event_id');
             $table->timestamps();
+
+            $table->foreign('event_id')->references('id')->on('events');
         });
     }
 
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('press_review');
+        Schema::dropIfExists('add_ons');
     }
 };

@@ -13,10 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('press_reviews', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('name')->unique();
+            $table->text('content');
+            $table->string('author', 50)->nullable();
+            $table->string('img_url');
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('press_reviews');
     }
 };

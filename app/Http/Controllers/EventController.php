@@ -51,7 +51,8 @@ class EventController extends Controller
     }
 
     public function store(Request $request)
-    {
+{
+    try {
         $validatedData = $request->validate([
             'name' => 'required|string',
             'start_date' => 'required|date',
@@ -72,13 +73,11 @@ class EventController extends Controller
             foreach ($request->file('images') as $index => $image) {
                 $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $image->move(public_path('images'), $imageName);
-        
+
                 $images[] = new Image([
                     'name' => $eventName . '_image' . $index,
-                    'image_url' => asset('images/' . $imageName),
-                    'user_id' => null,
+                    'image_url' => asset('images/' . $imageName),                
                     'event_id' => $event->id,
-                    'category_id' => null,
                 ]);
             }
 
@@ -94,11 +93,15 @@ class EventController extends Controller
                     'event_id' => $event->id,
                 ]);
             }
-    
+
             $event->add_on()->saveMany($addOns);
         }
 
         return response()->json('Event created successfully');
+    } catch (\Exception $e) {
+        // Xử lý lỗi ở đây, ví dụ:
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 
 }

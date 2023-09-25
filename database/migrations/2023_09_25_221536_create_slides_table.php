@@ -13,14 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('add_on', function (Blueprint $table) {
+        Schema::create('slides', function (Blueprint $table) {
             $table->id();
-            $table->string('department');
-            $table->string('responsible');
-            $table->unsignedBigInteger('event_id');
+            $table->string('title');
+            $table->text('content');
+            $table->string('img_url');
             $table->timestamps();
-
-            $table->foreign('event_id')->references('id')->on('events');
         });
     }
 
@@ -31,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('add_on');
+        Schema::dropIfExists('slides');
     }
 };
