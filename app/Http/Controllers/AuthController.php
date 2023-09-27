@@ -46,6 +46,38 @@ class AuthController extends Controller
     
         return response()->json(['user' => $user, 'userToken' => $token], 201);
     }
+
+    public function update(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $request->validate([
+            'name' => 'string|max:255',
+            'email' => 'string|email|unique:users,email,' . $user->id,
+            'password' => 'string|min:8',
+        ]);
+
+        if ($request->has('name')) {
+            $user->name = $request->name;
+        }
+
+        if ($request->has('email')) {
+            $user->email = $request->email;
+        }
+
+        if ($request->has('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return response()->json(['message' => 'User updated successfully', 'user' => $user], 200);
+    }
+
     
     public function login(Request $request)
     {
@@ -64,5 +96,18 @@ class AuthController extends Controller
     {
         Auth::user()->tokens()->delete();
         return response()->json(['message' => 'Logged out'], 200);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'Account is not exist'], 404);
+        }
+
+        $user->delete();
+
+        return response()->json(['message' => 'Account deleted!'], 200);
     }
 }

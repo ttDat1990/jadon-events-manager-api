@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\SlideController;
+use App\Http\Controllers\PressReviewController;
 
 // Auth admin
 Route::post('/admin/login', [AdminAuthController::class, 'adminLogin']);
@@ -15,11 +16,13 @@ Route::group(['middleware' => ['auth:admin']], function () {
     Route::post('/admin/logout', [AdminAuthController::class, 'adminLogout']);
 });
 
-// Auth user
+// user
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/users', [AuthController::class, 'index']);
+Route::delete('/users/{id}', [AuthController::class, 'destroy']);
+Route::post('/users/{id}', [AuthController::class, 'update']);
 
 //categories
 Route::get('categories', [CategoryController::class, 'index']);
@@ -41,3 +44,10 @@ Route::post('slides', [SlideController::class, 'store']);
 Route::get('slides/{id}', [SlideController::class, 'show']);
 Route::post('slides/{id}', [SlideController::class, 'update']);
 Route::delete('slides/{id}', [SlideController::class, 'destroy']);
+
+//Press-reviews
+Route::get('press-review', [PressReviewController::class, 'index']);
+Route::get('press-review/{id}', [PressReviewController::class, 'show']);
+Route::post('press-review', [PressReviewController::class, 'store']);
+Route::post('press-review/{id}', [PressReviewController::class, 'update']);
+Route::delete('press-review/{id}', [PressReviewController::class, 'destroy']);

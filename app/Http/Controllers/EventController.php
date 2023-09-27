@@ -13,7 +13,7 @@ class EventController extends Controller
     {
         $perPage = $request->input('per_page', 10);
 
-        $query = Event::with('images', 'add_on', 'user', 'category');
+        $query = Event::with('images', 'add_ons', 'user', 'category');
 
         if ($request->has('event_name')) {
             $eventName = $request->input('event_name');
@@ -41,7 +41,7 @@ class EventController extends Controller
 
     public function show($id)
     {
-        $event = Event::with('images', 'add_on', 'user', 'category')->find($id);
+        $event = Event::with('images', 'add_ons', 'user', 'category')->find($id);
 
         if (!$event) {
             return response()->json(['message' => 'Event not found'], 404);
@@ -51,57 +51,127 @@ class EventController extends Controller
     }
 
     public function store(Request $request)
-{
-    try {
-        $validatedData = $request->validate([
-            'name' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date',
-            'category_id' => 'required|exists:categories,id',
-            'user_id' => 'required|exists:users,id',
-            'images' => 'array', 
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', 
-            'add_ons' => 'array', 
-            'add_ons.*.department' => 'string',
-            'add_ons.*.responsible' => 'string',
-        ]);
+    {
+        try {
+            $validatedData = $request->validate([
+                'name' => 'required|string',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date',
+                'category_id' => 'required|exists:categories,id',
+                'user_id' => 'required|exists:users,id',
+                'images' => 'array', 
+                'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', 
+                'add_ons' => 'array', 
+                'add_ons.*.department' => 'string',
+                'add_ons.*.responsible' => 'string',
+            ]);
 
-        $event = Event::create($validatedData);
-        $eventName = $validatedData['name'];
-        $images = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $image) {
-                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('images'), $imageName);
+            $event = Event::create($validatedData);
+            $eventName = $validatedData['name'];
+            $images = [];
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $index => $image) {
+                    $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('images'), $imageName);
 
-                $images[] = new Image([
-                    'name' => $eventName . '_image' . $index,
-                    'image_url' => asset('images/' . $imageName),                
-                    'event_id' => $event->id,
-                ]);
+                    $images[] = new Image([
+                        'name' => $eventName . '_image' . $index,
+                        'image_url' => asset('images/' . $imageName),                
+                        'event_id' => $event->id,
+                    ]);
+                }
+
+                $event->images()->saveMany($images);
             }
 
-            $event->images()->saveMany($images);
-        }
+            if ($request->has('add_ons')) {
+                $addOns = [];
+                foreach ($request->input('add_ons') as $addOnData) {
+                    $addOns[] = new AddOn([
+                        'department' => $addOnData['department'],
+                        'responsible' => $addOnData['responsible'],
+                        'event_id' => $event->id,
+                    ]);
+                }
 
-        if ($request->has('add_ons')) {
-            $addOns = [];
-            foreach ($request->input('add_ons') as $addOnData) {
-                $addOns[] = new AddOn([
-                    'department' => $addOnData['department'],
-                    'responsible' => $addOnData['responsible'],
-                    'event_id' => $event->id,
-                ]);
+                $event->add_ons()->saveMany($addOns);
             }
 
-            $event->add_on()->saveMany($addOns);
+            return response()->json('Event created successfully');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return response()->json('Event created successfully');
-    } catch (\Exception $e) {
-        // Xử lý lỗi ở đây, ví dụ:
-        return response()->json(['error' => $e->getMessage()], 500);
     }
-}
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $event = Event::findOrFail($id);
+
+            $validatedData = $request->validate([
+                'name' => 'string',
+                'start_date' => 'date',
+                'end_date' => 'date',
+                'category_id' => 'exists:categories,id',
+                'user_id' => 'exists:users,id',
+                'images' => 'array',
+                'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+                'add_ons' => 'array',
+                'add_ons.*.department' => 'string',
+                'add_ons.*.responsible' => 'string',
+            ]);
+
+            $event->update($validatedData);
+
+            if ($request->hasFile('images')) {
+                $images = [];
+                foreach ($request->file('images') as $index => $image) {
+                    $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                    $image->move(public_path('images'), $imageName);
+
+                    $images[] = new Image([
+                        'name' => $event->name . '_image' . $index,
+                        'image_url' => asset('images/' . $imageName),
+                        'event_id' => $event->id,
+                    ]);
+                }
+
+                $event->images()->delete(); 
+                $event->images()->saveMany($images);
+            }
+
+            if ($request->has('add_ons')) {
+                $addOns = [];
+                foreach ($request->input('add_ons') as $addOnData) {
+                    $addOns[] = new AddOn([
+                        'department' => $addOnData['department'],
+                        'responsible' => $addOnData['responsible'],
+                        'event_id' => $event->id,
+                    ]);
+                }
+
+                $event->add_ons()->delete();
+                $event->add_ons()->saveMany($addOns);
+            }
+
+            return response()->json('Event updated successfully');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $event = Event::findOrFail($id);
+            $event->images()->delete();
+            $event->add_ons()->delete();
+            $event->delete();
+
+            return response()->json('Event deleted successfully');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 
 }

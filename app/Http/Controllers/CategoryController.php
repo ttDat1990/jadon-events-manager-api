@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
-        public function index()
+    public function index()
     {
         $categories = Category::all();
 
@@ -34,8 +34,8 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'title' => 'required',
+        $data = $request->validate([
+            'title' => 'required|string',
             'name' => 'required|unique:categories',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -72,6 +72,13 @@ class CategoryController extends Controller
         $category->name = $request->input('name');
 
         if ($request->hasFile('image')) {
+
+            // Xóa tệp hình ảnh cũ
+            $oldImagePath = public_path($category->img_url);
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }
+
             $image = $request->file('image');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('images'), $imageName);

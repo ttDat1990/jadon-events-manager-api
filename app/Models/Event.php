@@ -25,7 +25,7 @@ class Event extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function add_on()
+    public function add_ons()
     {
         return $this->hasMany(AddOn::class);
     }
