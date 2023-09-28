@@ -9,16 +9,29 @@ use Illuminate\Support\Facades\Storage;
 
 class PressReviewController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pressReviews = PressReview::all();
+        $perPage = $request->input('per_page', 10);
+        $query = PressReview::query();
 
-        $result = $pressReviews->map(function ($pressReview) {
+        if ($request->has('name')) {
+            $pressName = $request->input('name');
+            $query->where('title', 'like', "%$pressName%");
+        }
+
+        if ($request->has('author')) {
+            $author = $request->input('author');
+            $query->where('author', 'like', "%$author%");
+        }
+
+        $pressReview = $query->paginate($perPage);
+
+        $pressReview->getCollection()->transform(function ($pressReview) {
             $pressReview['img_url'] = asset($pressReview['img_url']);
             return $pressReview;
         });
 
-        return response()->json($result);
+        return response()->json($pressReview);
     }
     
     public function show($id)
