@@ -37,6 +37,7 @@ Route::get('events/{id}', [EventController::class, 'show']);
 Route::post('events', [EventController::class, 'store']);
 Route::post('events/{id}', [EventController::class, 'update']);
 Route::delete('events/{id}', [EventController::class, 'destroy']);
+Route::get('user-events/{userId}', [EventController::class,'getUserEvents'])->middleware('auth:sanctum');
 
 //slides
 Route::get('slides', [SlideController::class, 'index']);

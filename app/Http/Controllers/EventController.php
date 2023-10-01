@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Image;
 use App\Models\AddOn;
+use App\Models\User;
 
 class EventController extends Controller
 {
@@ -124,6 +125,15 @@ class EventController extends Controller
             $event->update($validatedData);
 
             if ($request->hasFile('images')) {
+
+                foreach ($event->images as $image) {
+                    $imagePath = public_path('images/') . basename($image->image_url);
+                    if (file_exists($imagePath)) {
+                        unlink($imagePath);
+                    }
+                }
+                $event->images()->delete();
+
                 $images = [];
                 foreach ($request->file('images') as $index => $image) {
                     $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
@@ -135,8 +145,6 @@ class EventController extends Controller
                         'event_id' => $event->id,
                     ]);
                 }
-
-                $event->images()->delete(); 
                 $event->images()->saveMany($images);
             }
 
@@ -164,6 +172,18 @@ class EventController extends Controller
     {
         try {
             $event = Event::findOrFail($id);
+
+            $images = $event->images;
+            echo($images);
+            
+            foreach ($images as $image) {
+                $imagePath = public_path('images/') . basename($image->image_url);
+                if (file_exists($imagePath)) {
+                    echo('1');
+                    unlink($imagePath);
+                }
+            }
+
             $event->images()->delete();
             $event->add_ons()->delete();
             $event->delete();
@@ -172,6 +192,29 @@ class EventController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function getUserEvents(Request $request, $userId)
+    {
+        $perPage = $request->input('per_page', 10);
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not exist'], 404);
+        }
+
+        $query = $user->events()->with('images', 'category');
+
+        if ($request->has('category_name')) {
+            $categoryName = $request->input('category_name');
+            $query->whereHas('category', function ($categoryQuery) use ($categoryName) {
+                $categoryQuery->where('name', 'like', "%$categoryName%");
+            });
+        }
+
+        $events = $query->paginate($perPage);
+
+        return response()->json(['events' => $events], 200);
     }
 
 }
