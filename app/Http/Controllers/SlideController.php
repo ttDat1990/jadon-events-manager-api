@@ -77,9 +77,9 @@ class SlideController extends Controller
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
-            if ($data->fails()) {
-                return response()->json(['message' => $validator->errors()], 400);
-            }
+            // if ($data->fails()) {
+            //     return response()->json(['message' => $validator->errors()], 400);
+            // }
 
             $image = $request->file('image');
 

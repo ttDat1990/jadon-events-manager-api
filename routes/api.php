@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\SlideController;
 use App\Http\Controllers\PressReviewController;
+use App\Http\Controllers\CommentController;
 
 // Auth admin
 Route::post('/admin/login', [AdminAuthController::class, 'adminLogin']);
@@ -52,3 +53,11 @@ Route::get('press-review/{id}', [PressReviewController::class, 'show']);
 Route::post('press-review', [PressReviewController::class, 'store']);
 Route::post('press-review/{id}', [PressReviewController::class, 'update']);
 Route::delete('press-review/{id}', [PressReviewController::class, 'destroy']);
+
+//comments
+Route::get('comment/{id}', [CommentController::class, 'index']);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('comment', [CommentController::class, 'store']);
+    Route::post('comment/{id}', [CommentController::class, 'update']);
+    Route::delete('comment/{id}', [CommentController::class, 'destroy']);
+});
