@@ -10,6 +10,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\SlideController;
 use App\Http\Controllers\PressReviewController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
 
 // Auth admin
 Route::post('/admin/login', [AdminAuthController::class, 'adminLogin']);
@@ -60,4 +61,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('comment', [CommentController::class, 'store']);
     Route::post('comment/{id}', [CommentController::class, 'update']);
     Route::delete('comment/{id}', [CommentController::class, 'destroy']);
+});
+
+//like
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('like/{commentId}', [LikeController::class, 'like']);
 });

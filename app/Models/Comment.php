@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\PressReview;
+use App\Models\Like;
 
 
 class Comment extends Model
@@ -22,6 +23,11 @@ class Comment extends Model
     public function pressReview()
     {
         return $this->belongsTo(PressReview::class);
+    }
+
+    public function likesCount()
+    {
+        return $this->hasMany(Like::class)->count();
     }
 
 }
