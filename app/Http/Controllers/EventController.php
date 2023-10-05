@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Image;
@@ -14,11 +15,11 @@ class EventController extends Controller
     {
         $perPage = $request->input('per_page', 10);
 
-        $query = Event::with('images', 'add_ons', 'user', 'category');
+        $query = Event::with('images', 'add_ons', 'user', 'category')->orderBy('created_at', 'desc');
 
         if ($request->has('event_name')) {
             $eventName = $request->input('event_name');
-            $query->where('name', 'like', "%$eventName%");
+            $query->where('name', 'like', "%$eventName%")->orWhereNull('user_id');;
         }
 
         if ($request->has('category_name')) {
@@ -31,10 +32,10 @@ class EventController extends Controller
         if ($request->has('user_name')) {
             $userName = $request->input('user_name');
             $query->whereHas('user', function ($userQuery) use ($userName) {
-                $userQuery->where('name', 'like', "%$userName%");
+                $userQuery->where('name', 'like', "%$userName%")
+                    ->orWhereNull('name');
             });
         }
-
         $events = $query->paginate($perPage);
 
         return response()->json($events);
@@ -53,23 +54,32 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
+        $rules = [
+            'name' => 'required|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'category_id' => 'required|exists:categories,id',
+            'user_id' => 'required|exists:users,id',
+            'images' => 'array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'add_ons' => 'array',
+            'add_ons.*.department' => 'string',
+            'add_ons.*.responsible' => 'string',
+        ];
+
+        $messages = [
+            'images.*.image' => 'The :attribute must be an image.',
+            'images.*.mimes' => 'The :attribute must be a file of type: jpeg, png, jpg, gif.',
+            'images.*.max' => 'The :attribute may not be greater than 2048 kilobytes.',
+        ];
+
         try {
-            $validatedData = $request->validate([
-                'name' => 'required|string',
-                'start_date' => 'required|date',
-                'end_date' => 'required|date',
-                'category_id' => 'required|exists:categories,id',
-                'user_id' => 'required|exists:users,id',
-                'images' => 'array', 
-                'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048', 
-                'add_ons' => 'array', 
-                'add_ons.*.department' => 'string',
-                'add_ons.*.responsible' => 'string',
-            ]);
+            $validatedData = $request->validate($rules, $messages);
 
             $event = Event::create($validatedData);
             $eventName = $validatedData['name'];
             $images = [];
+
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $image) {
                     $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
@@ -77,7 +87,7 @@ class EventController extends Controller
 
                     $images[] = new Image([
                         'name' => $eventName . '_image' . $index,
-                        'image_url' => asset('images/' . $imageName),                
+                        'image_url' => asset('images/' . $imageName),
                         'event_id' => $event->id,
                     ]);
                 }
@@ -87,6 +97,7 @@ class EventController extends Controller
 
             if ($request->has('add_ons')) {
                 $addOns = [];
+
                 foreach ($request->input('add_ons') as $addOnData) {
                     $addOns[] = new AddOn([
                         'department' => $addOnData['department'],
@@ -99,6 +110,8 @@ class EventController extends Controller
             }
 
             return response()->json('Event created successfully');
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -163,6 +176,8 @@ class EventController extends Controller
             }
 
             return response()->json('Event updated successfully');
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -174,12 +189,10 @@ class EventController extends Controller
             $event = Event::findOrFail($id);
 
             $images = $event->images;
-            echo($images);
             
             foreach ($images as $image) {
                 $imagePath = public_path('images/') . basename($image->image_url);
                 if (file_exists($imagePath)) {
-                    echo('1');
                     unlink($imagePath);
                 }
             }

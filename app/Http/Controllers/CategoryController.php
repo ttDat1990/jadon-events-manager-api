@@ -88,7 +88,7 @@ class CategoryController extends Controller
 
         $category->save();
 
-        return response()->json(['message' => 'Category updated successfully'], 200);
+        return response()->json('Category updated successfully');
     }
     public function destroy($id)
     {

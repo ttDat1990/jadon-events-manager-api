@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PressReview;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 
 class PressReviewController extends Controller
@@ -24,6 +25,7 @@ class PressReviewController extends Controller
             $query->where('author', 'like', "%$author%");
         }
 
+        $query->orderBy('created_at', 'desc');
         $pressReview = $query->paginate($perPage);
 
         $pressReview->getCollection()->transform(function ($pressReview) {
@@ -67,7 +69,7 @@ class PressReviewController extends Controller
             'img_url' => $relativeImageUrl,
         ]);
 
-        return response()->json(['message' => 'Press-review created successfully'], 201);
+        return response()->json('Press-review created successfully');
     }
 
     public function update(Request $request, $id)
@@ -108,7 +110,7 @@ class PressReviewController extends Controller
 
         $pressReview->save();
 
-        return response()->json(['message' => 'Press-review updated successfully'], 200);
+        return response()->json('Press-review updated successfully');
     }
 
     public function destroy($id)

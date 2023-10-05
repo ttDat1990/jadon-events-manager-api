@@ -65,44 +65,36 @@ class SlideController extends Controller
 
     public function update(Request $request, $id)
     {
-        try {
-            $slide = Slide::find($id);
-            if (!$slide) {
-                return response()->json(['message' => 'Slide not found'], 404);
-            }
+        $data = $request->validate([
+            'title' => 'required|string',
+            'content' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-            $data = $request->validate([
-                'title' => 'required|string',
-                'content' => 'required|string',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
-
-            // if ($data->fails()) {
-            //     return response()->json(['message' => $validator->errors()], 400);
-            // }
-
-            $image = $request->file('image');
-
-            if ($image) {
-
-                $oldImagePath = public_path($slide->img_url);
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
-
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('images'), $imageName);
-                $slide->img_url = 'images/' . $imageName;
-            }
-
-            $slide->title = $data['title'];
-            $slide->content = $data['content'];
-            $slide->save();
-
-            return response()->json(['message' => 'Slide updated successfully'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
+        $slide = Slide::find($id);
+        if (!$slide) {
+            return response()->json(['message' => 'Slide not found'], 404);
         }
+
+        $image = $request->file('image');
+
+        if ($image) {
+
+            $oldImagePath = public_path($slide->img_url);
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }
+
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images'), $imageName);
+            $slide->img_url = 'images/' . $imageName;
+        }
+
+        $slide->title = $data['title'];
+        $slide->content = $data['content'];
+        $slide->save();
+
+        return response()->json('Slide updated successfully');
     }
 
     public function destroy($id)

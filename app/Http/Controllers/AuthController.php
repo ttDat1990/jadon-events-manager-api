@@ -23,6 +23,8 @@ class AuthController extends Controller
             $query->where('email', 'like', '%' . $request->input('email') . '%');
         }
 
+        $query->orderBy('created_at', 'desc');
+
         $users = $query->paginate($perPage);
 
         return response()->json(['users' => $users], 200);
@@ -31,7 +33,7 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|min:8|max:100',
             'email' => 'required|string|email|unique:users',
             'password' => 'required|string|min:8',
         ]);
@@ -56,7 +58,7 @@ class AuthController extends Controller
         }
 
         $request->validate([
-            'name' => 'string|max:255',
+            'name' => 'string|min:8|max:100',
             'email' => 'string|email|unique:users,email,' . $user->id,
             'password' => 'string|min:8',
         ]);

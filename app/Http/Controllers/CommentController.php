@@ -55,6 +55,7 @@ class CommentController extends Controller
         $comment->save();
 
         $comment->name = auth()->user()->name;
+        $comment->likes_count = 0;
 
         return response()->json(['message' => 'Comment created successfully', 'comment' => $comment]);
     }
