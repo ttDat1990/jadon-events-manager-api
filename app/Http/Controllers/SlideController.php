@@ -40,7 +40,7 @@ class SlideController extends Controller
             $data = $request->validate([
                 'title' => 'required|string',
                 'content' => 'required|string',
-                'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096',
             ]);
 
             $image = $request->file('image');
@@ -68,7 +68,7 @@ class SlideController extends Controller
         $data = $request->validate([
             'title' => 'required|string',
             'content' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ]);
 
         $slide = Slide::find($id);

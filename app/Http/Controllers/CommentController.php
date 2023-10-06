@@ -30,7 +30,6 @@ class CommentController extends Controller
             'parent_id' => 'nullable|exists:comments,id',
         ]);
 
-        // Kiểm tra xem số tầng bình luận đã đạt đến giới hạn 5 chưa
         if ($validatedData['parent_id']) {
             $parentComment = Comment::find($validatedData['parent_id']);
             if ($parentComment->level >= 4) {
@@ -42,8 +41,7 @@ class CommentController extends Controller
         $comment->user_id = auth()->user()->id;
         $comment->press_id = $validatedData['press_id'];
         $comment->content = $validatedData['content'];
-
-        // Nếu là bình luận con, cập nhật level và parent_id
+        
         if ($validatedData['parent_id']) {
             $comment->parent_id = $validatedData['parent_id'];
             $comment->level = $parentComment->level + 1;

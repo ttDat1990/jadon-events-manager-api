@@ -25,7 +25,7 @@ class PressReviewController extends Controller
             $query->where('author', 'like', "%$author%");
         }
 
-        $query->orderBy('created_at', 'desc');
+        $query->orderBy('created_at', 'asc');
         $pressReview = $query->paginate($perPage);
 
         $pressReview->getCollection()->transform(function ($pressReview) {
@@ -54,7 +54,7 @@ class PressReviewController extends Controller
             'title' => 'required|string',
             'content' => 'required|string',
             'author' => 'required|max:50',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:4096',
         ]);
 
         $image = $request->file('image');
@@ -84,7 +84,7 @@ class PressReviewController extends Controller
             'title' => 'required|string',
             'content' => 'required|string',
             'author' => 'required|max:50',
-            'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'image|mimes:jpeg,png,jpg,gif|max:4096',
         ]);
 
         $oldImage = $pressReview->img_url;

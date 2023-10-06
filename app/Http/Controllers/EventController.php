@@ -17,25 +17,26 @@ class EventController extends Controller
 
         $query = Event::with('images', 'add_ons', 'user', 'category')->orderBy('created_at', 'desc');
 
-        if ($request->has('event_name')) {
-            $eventName = $request->input('event_name');
-            $query->where('name', 'like', "%$eventName%")->orWhereNull('user_id');;
+        $eventName = $request->input('event_name');
+        if (!empty($eventName)) {
+            $query->where('name', 'like', "%$eventName%");
         }
 
-        if ($request->has('category_name')) {
-            $categoryName = $request->input('category_name');
-            $query->whereHas('category', function ($categoryQuery) use ($categoryName) {
-                $categoryQuery->where('name', 'like', "%$categoryName%");
-            });
-        }
-
-        if ($request->has('user_name')) {
-            $userName = $request->input('user_name');
+        $userName = $request->input('user_name');
+        if (!empty($userName)) {
             $query->whereHas('user', function ($userQuery) use ($userName) {
                 $userQuery->where('name', 'like', "%$userName%")
                     ->orWhereNull('name');
             });
         }
+
+        $categoryName = $request->input('category_name');
+        if (!empty($categoryName)) {
+            $query->whereHas('category', function ($categoryQuery) use ($categoryName) {
+                $categoryQuery->where('name', 'like', "%$categoryName%");
+            });
+        }
+
         $events = $query->paginate($perPage);
 
         return response()->json($events);
@@ -61,7 +62,7 @@ class EventController extends Controller
             'category_id' => 'required|exists:categories,id',
             'user_id' => 'required|exists:users,id',
             'images' => 'array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:4096',
             'add_ons' => 'array',
             'add_ons.*.department' => 'string',
             'add_ons.*.responsible' => 'string',
@@ -129,7 +130,7 @@ class EventController extends Controller
                 'category_id' => 'exists:categories,id',
                 'user_id' => 'exists:users,id',
                 'images' => 'array',
-                'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+                'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:4096',
                 'add_ons' => 'array',
                 'add_ons.*.department' => 'string',
                 'add_ons.*.responsible' => 'string',
