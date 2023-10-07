@@ -11,6 +11,7 @@ use App\Http\Controllers\SlideController;
 use App\Http\Controllers\PressReviewController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\ContactController;
 
 // Auth admin
 Route::post('/admin/login', [AdminAuthController::class, 'adminLogin']);
@@ -67,3 +68,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('like/{commentId}', [LikeController::class, 'like']);
 });
+
+//contacts
+Route::get('/contacts', [ContactController::class, 'index']);
+Route::post('/contacts', [ContactController::class, 'store']);
