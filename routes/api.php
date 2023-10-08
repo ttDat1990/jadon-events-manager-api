@@ -72,3 +72,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
 //contacts
 Route::get('/contacts', [ContactController::class, 'index']);
 Route::post('/contacts', [ContactController::class, 'store']);
+Route::get('/contacts/{id}', [ContactController::class, 'updateIsChecked']);
+Route::delete('/contacts/{id}', [ContactController::class, 'destroy']);

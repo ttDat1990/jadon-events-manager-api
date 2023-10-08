@@ -8,9 +8,24 @@ use App\Models\Contact;
 
 class ContactController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $contacts = Contact::orderBy('created_at', 'desc')->get();
+        $perPage = $request->input('per_page', 10);
+
+        $query = Contact::query();
+
+        if ($request->has('name')) {
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        if ($request->has('email')) {
+            $query->where('email', 'like', '%' . $request->input('email') . '%');
+        }
+
+        $query->orderByRaw('isChecked ASC, created_at DESC');
+
+        $contacts = $query->paginate($perPage);
+
         return response()->json($contacts);
     }
 
@@ -31,12 +46,6 @@ class ContactController extends Controller
         return response()->json($contact, 201);
     }
 
-    public function getUncheckedContacts()
-    {
-        $uncheckedContacts = Contact::where('isChecked', false)->get();
-        return response()->json($uncheckedContacts);
-    }
-
     public function updateIsChecked($id)
     {
         $contact = Contact::find($id);
@@ -48,6 +57,19 @@ class ContactController extends Controller
         $contact->isChecked = true;
         $contact->save();
 
-        return response()->json(['message' => 'Contact is checked']);
+        return response()->json(['message' => 'Contact is checked','contact' => $contact]);
+    }
+
+    public function destroy($id)
+    {
+        $contact = Contact::find($id);
+
+        if (!$contact) {
+            return response()->json(['message' => 'Contact not exist'], 404);
+        }
+
+        $contact->delete();
+
+        return response()->json(['message' => 'Contact deleted']);
     }
 }
