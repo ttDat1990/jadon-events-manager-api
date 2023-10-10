@@ -29,6 +29,13 @@ class ContactController extends Controller
         return response()->json($contacts);
     }
 
+    public function uncheckedContact()
+    {
+        $count = Contact::where('isChecked', false)->count();
+
+        return response()->json(['count' => $count]);
+    }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([

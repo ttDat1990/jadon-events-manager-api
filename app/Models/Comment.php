@@ -22,7 +22,7 @@ class Comment extends Model
 
     public function pressReview()
     {
-        return $this->belongsTo(PressReview::class);
+        return $this->belongsTo(PressReview::class, 'press_id');
     }
 
     public function likesCount()

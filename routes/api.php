@@ -12,6 +12,7 @@ use App\Http\Controllers\PressReviewController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\FeedbackController;
 
 // Auth admin
 Route::post('/admin/login', [AdminAuthController::class, 'adminLogin']);
@@ -58,10 +59,14 @@ Route::delete('press-review/{id}', [PressReviewController::class, 'destroy']);
 
 //comments
 Route::get('comment/{id}', [CommentController::class, 'index']);
+Route::get('comment', [CommentController::class, 'index2']);
+Route::get('/comment/unchecked/count', [CommentController::class, 'uncheckedComment']);
+Route::get('/comment/check/{id}', [CommentController::class, 'updateIsChecked']);
+Route::post('/comment/checks', [CommentController::class, 'updateRowChecked']);
+Route::delete('/comment/{id}', [CommentController::class, 'destroy']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('comment', [CommentController::class, 'store']);
     Route::post('comment/{id}', [CommentController::class, 'update']);
-    Route::delete('comment/{id}', [CommentController::class, 'destroy']);
 });
 
 //like
@@ -71,6 +76,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 //contacts
 Route::get('/contacts', [ContactController::class, 'index']);
+Route::get('/contacts/unchecked/count', [ContactController::class, 'uncheckedContact']);
 Route::post('/contacts', [ContactController::class, 'store']);
 Route::get('/contacts/{id}', [ContactController::class, 'updateIsChecked']);
 Route::delete('/contacts/{id}', [ContactController::class, 'destroy']);
+
+
+//feedback
+Route::get('/feedbacks', [FeedbackController::class, 'index']);
+Route::get('/feedbacks/unchecked/count', [FeedbackController::class, 'uncheckedFeedback']);
+Route::post('/feedbacks', [FeedbackController::class, 'store']);
+Route::get('/feedbacks/{id}', [FeedbackController::class, 'updateIsChecked']);
+Route::delete('/feedbacks/{id}', [FeedbackController::class, 'destroy']);
