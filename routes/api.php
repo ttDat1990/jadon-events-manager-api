@@ -13,6 +13,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ReviewController;
 
 // Auth admin
 Route::post('/admin/login', [AdminAuthController::class, 'adminLogin']);
@@ -88,3 +89,10 @@ Route::get('/feedbacks/unchecked/count', [FeedbackController::class, 'uncheckedF
 Route::post('/feedbacks', [FeedbackController::class, 'store']);
 Route::get('/feedbacks/{id}', [FeedbackController::class, 'updateIsChecked']);
 Route::delete('/feedbacks/{id}', [FeedbackController::class, 'destroy']);
+
+//reviews
+Route::get('reviews', [ReviewController::class, 'index']);
+Route::get('reviews/{id}', [ReviewController::class, 'show']);
+Route::post('reviews', [ReviewController::class, 'store']);
+Route::post('reviews/{id}', [ReviewController::class, 'update']);
+Route::delete('reviews/{id}', [ReviewController::class, 'destroy']);

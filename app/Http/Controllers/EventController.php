@@ -62,7 +62,7 @@ class EventController extends Controller
             'category_id' => 'required|exists:categories,id',
             'user_id' => 'required|exists:users,id',
             'images' => 'array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:4096',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'add_ons' => 'array',
             'add_ons.*.department' => 'string',
             'add_ons.*.responsible' => 'string',
@@ -130,7 +130,7 @@ class EventController extends Controller
                 'category_id' => 'exists:categories,id',
                 'user_id' => 'exists:users,id',
                 'images' => 'array',
-                'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:4096',
+                'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
                 'add_ons' => 'array',
                 'add_ons.*.department' => 'string',
                 'add_ons.*.responsible' => 'string',
@@ -139,27 +139,32 @@ class EventController extends Controller
             $event->update($validatedData);
 
             if ($request->hasFile('images')) {
-
-                foreach ($event->images as $image) {
-                    $imagePath = public_path('images/') . basename($image->image_url);
-                    if (file_exists($imagePath)) {
-                        unlink($imagePath);
-                    }
-                }
-                $event->images()->delete();
-
-                $images = [];
                 foreach ($request->file('images') as $index => $image) {
                     $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                     $image->move(public_path('images'), $imageName);
-
-                    $images[] = new Image([
+    
+                    $newImage = new Image([
                         'name' => $event->name . '_image' . $index,
                         'image_url' => asset('images/' . $imageName),
                         'event_id' => $event->id,
                     ]);
+    
+                    $event->images()->save($newImage);
                 }
-                $event->images()->saveMany($images);
+            }
+    
+            if ($request->has('deleted_images')) {
+                $deletedImages = explode(',', $request->input('deleted_images'));
+                foreach ($deletedImages as $imageId) {
+                    $image = Image::find($imageId);
+                    if ($image) {
+                        $imagePath = public_path('images/') . basename($image->image_url);
+                        if (file_exists($imagePath)) {
+                            unlink($imagePath);
+                        }
+                        $image->delete();
+                    }
+                }
             }
 
             if ($request->has('add_ons')) {
