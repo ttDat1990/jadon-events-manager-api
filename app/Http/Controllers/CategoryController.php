@@ -73,7 +73,6 @@ class CategoryController extends Controller
 
         if ($request->hasFile('image')) {
 
-            // Xóa tệp hình ảnh cũ
             $oldImagePath = public_path($category->img_url);
             if (file_exists($oldImagePath)) {
                 unlink($oldImagePath);
@@ -98,7 +97,6 @@ class CategoryController extends Controller
             return response()->json(['message' => 'Category not found'], 404);
         }
 
-        // Xóa hình ảnh của danh mục nếu có
         if (file_exists(public_path($category->img_url))) {
             unlink(public_path($category->img_url));
         }

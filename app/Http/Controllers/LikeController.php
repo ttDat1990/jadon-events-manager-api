@@ -18,18 +18,17 @@ class LikeController extends Controller
 
         $user = auth()->user();
 
-        // Kiểm tra xem người dùng đã thích bình luận này trước đó chưa
         $existingLike = Like::where('user_id', $user->id)
             ->where('comment_id', $comment->id)
             ->first();
 
         if ($existingLike) {
-            // Nếu đã thích trước đó, xóa lượt thích để chuyển về trạng thái "chưa thích"
+
             $existingLike->delete();
             $message = 'Comment unliked successfully';
             $liked = false;
         } else {
-            // Tạo một lượt thích mới cho bình luận
+
             $like = new Like();
             $like->user_id = $user->id;
             $like->comment_id = $comment->id;
